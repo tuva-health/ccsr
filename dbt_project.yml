@@ -30,4 +30,6 @@ vars:
     #     {%- else %}{{ref('claims_preprocessing__procedure')}}
     #     {%- endif %}
     
-    ccsr_condition_override: "{{ref('condition')}}"
+    # ccsr_condition_override: "{{ref('condition')}}"
+
+    ccsr_condition_override: "(select * from medicare_saf.core.condition limit 100)"
