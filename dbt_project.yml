@@ -24,15 +24,17 @@ vars:
         {%- elif var('core_condition_override',none) is not none %}{{var('core_condition_override')}}
         # {%- else %}{{ref('claims_preprocessing__condition')}}
         {%- endif %}
-    # procedure: >
-    #     {% if var('ccsr_procedure_override',none) is not none %}{{var('ccsr_procedure_override')}}
-    #     {%- elif var('core_procedure_override',none) is not none %}{{var('core_procedure_override')}}
-    #     {%- else %}{{ref('claims_preprocessing__procedure')}}
-    #     {%- endif %}
+    procedure: >
+        {% if var('ccsr_procedure_override',none) is not none %}{{var('ccsr_procedure_override')}}
+        {%- elif var('core_procedure_override',none) is not none %}{{var('core_procedure_override')}}
+        {%- else %}{{ref('claims_preprocessing__procedure')}}
+        {%- endif %}
     
     # ccsr_condition_override: "{{ref('condition')}}"
 
-    ccsr_condition_override: "(select * from medicare_saf.core.condition limit 100)"
-    # ccsr_condition_override: "(select * from tuva_claims_demo_full.core.condition limit 100)"
+    ccsr_condition_override: "(select * from medicare_saf.core.condition)"
+    # ccsr_condition_override: "(select * from tuva_claims_demo_full.core.condition)"
     
     dxccsr_version: "2023.1"
+
+    ccsr_procedure_override: "select * from tuva_claims_demo_full.procedure"
