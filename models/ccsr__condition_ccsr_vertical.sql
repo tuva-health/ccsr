@@ -21,7 +21,7 @@ select
     dxccsr_vertical_codes.is_ip_default_category,
     dxccsr_vertical_codes.is_op_default_category,
     {{ var('dxccsr_version') }} as dxccsr_version
-from condition_records as aa
-left join dxccsr_vertical_codes as bb using(code)
+from condition_records 
+left join dxccsr_vertical_codes using(code)
 
     

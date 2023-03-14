@@ -33,3 +33,4 @@ vars:
     # ccsr_condition_override: "{{ref('condition')}}"
 
     ccsr_condition_override: "(select * from medicare_saf.core.condition limit 100)"
+    dxccsr_version: "2023.1"
