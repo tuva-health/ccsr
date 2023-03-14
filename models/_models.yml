@@ -3,6 +3,14 @@ version: 2
 models:
   - name: ccsr__dx_vertical_pivot
   - name: ccsr__long_condition_category
+    description: "This model contains a mapping of individual condition ICD-10-CM diagnosis codes to the
+      CCSR's clinically meaningful diagnosis categories. Each row represents a mapping of an ICD-10 code
+      to a CCSR category. As each ICD-10 code may be mapped to up to 6 categories, it's expected
+      that this table will output as many or more rows than the TUVA condition model.
+      The model is equivalent to the CCSR's Output Option 1 - Vertical File Output."
+    columns:
+      - name: encounter_id
+
   - name: ccsr__wide_condition_category
   - name: ccsr__singular_condition_category
   
