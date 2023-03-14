@@ -30,6 +30,7 @@ with bool_ranks as (
     select distinct
         encounter_id,
         ccsr_category,
+        -- assigns one of four values for each DXCCSR data element as per pg 25 of DXCCSR User guide v2023.1
         case 
             when not is_nth then 0
             when is_only_first and not is_excluded then 1

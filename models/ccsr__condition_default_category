@@ -1,0 +1,6 @@
+select 
+    claim_id,
+    DXCCSR_VERSION
+ from {{ref('ccsr__condition_ccsr_vertical')}}
+ where 
+    is_ip_default_category = true
