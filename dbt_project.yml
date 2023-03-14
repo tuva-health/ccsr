@@ -32,9 +32,9 @@ vars:
     
     # ccsr_condition_override: "{{ref('condition')}}"
 
-    ccsr_condition_override: "(select * from medicare_saf.core.condition)"
+    ccsr_condition_override: "(select * from medicare_saf.core.condition limit 100000)"
     # ccsr_condition_override: "(select * from tuva_claims_demo_full.core.condition)"
     
     dxccsr_version: "2023.1"
 
-    ccsr_procedure_override: "select * from tuva_claims_demo_full.procedure"
+    ccsr_procedure_override: "(select * from tuva_claims_demo_full.procedure limit 100000)"

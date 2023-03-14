@@ -2,7 +2,7 @@
 
 with dxccsr_vertical_codes as (
     
-    select * from {{ ref('ccsr__dx_vertical_pivot')}}
+    select * from {{ ref('ccsr__dx_vertical_pivot') }}
 
 ), condition_records as (
     

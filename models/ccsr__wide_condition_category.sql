@@ -1,15 +1,10 @@
 {{ config(materialized='table') }}
 
-{% set category_query %}
-select distinct 
-    ccsr_category
-from {{ ref('ccsr__long_condition_category') }}
-{% endset %}
 
-{% set categories = run_query(category_query) %}
-{% if execute %}
-{% set categories_list = categories.columns[0].values() %}
-{% endif %}
+{% set categories_list = dbt_utils.get_column_values(
+        table=ref("ccsr__dx_vertical_pivot"),
+        column="ccsr_category"
+) %}
 
 
 with bool_ranks as (

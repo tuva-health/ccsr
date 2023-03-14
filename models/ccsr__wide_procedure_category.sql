@@ -1,4 +1,4 @@
-{{ config(materialized='table') }}
+{{ config(materialized='table',enabled=false) }}
 
 {% set category_query %}
 select distinct 
