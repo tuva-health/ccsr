@@ -3,7 +3,7 @@
 {% set category_query %}
 select distinct 
     ccsr_category
-from {{ ref('ccsr__condition_ccsr_vertical') }}
+from {{ ref('ccsr__long_condition_category') }}
 {% endset %}
 
 {% set categories = run_query(category_query) %}
@@ -22,7 +22,7 @@ with bool_ranks as (
         boolor_agg(diagnosis_rank = 1) as is_first,
         boolor_agg(diagnosis_rank >= 1) as is_nth,
         boolor_agg(diagnosis_rank > 1) as not_first
-    from {{ ref('ccsr__condition_ccsr_vertical') }}
+    from {{ ref('ccsr__long_condition_category') }}
     {{ dbt_utils.group_by(n=3) }}
 
 ), bool_logic as (

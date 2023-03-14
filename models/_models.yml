@@ -2,8 +2,8 @@ version: 2
 
 models:
   - name: ccsr__dx_vertical_pivot
-  - name: condition
-  - name: ccsr__condition_ccsr_vertical
-  - name: ccsr__stg_dx_seed_standin
+  - name: ccsr__long_condition_category
+  - name: ccsr__wide_condition_category
+  - name: ccsr__singular_condition_category
   
   
