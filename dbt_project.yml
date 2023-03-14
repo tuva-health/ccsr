@@ -33,4 +33,6 @@ vars:
     # ccsr_condition_override: "{{ref('condition')}}"
 
     ccsr_condition_override: "(select * from medicare_saf.core.condition limit 100)"
+    # ccsr_condition_override: "(select * from tuva_claims_demo_full.core.condition limit 100)"
+    
     dxccsr_version: "2023.1"
