@@ -1,15 +1,31 @@
-Welcome to your new dbt project!
 
-### Using the starter project
+### Input CSV Files
 
-Try running the following commands:
-- dbt run
-- dbt test
+We encounted issues with the use of mixed quote characters in the CSV files provided with the CCSR SAS programs. We used the following python script to clean the files:
+
+```
+import pandas as pd
+
+FILES = ["DXCCSR_v2023-1/DXCCSR_v2023-1.csv", "PRCCSR_v2023-1/PRCCSR_v2023-1.csv"]
 
 
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+def ccsr_csv_cleaner(df, output_name):
+
+    clean_columns = []
+
+    for col in df.columns:
+        col_clean = col.strip("'").lower().replace(" ", "_").replace("-", "_")
+        clean_columns.append(col_clean)
+    df.columns = clean_columns
+
+    quoted_cols = df.columns[[not i for i in df.columns.str.endswith("_description")]]
+    df[quoted_cols] = df[quoted_cols].apply(lambda x: x.str.strip("'"))
+    df.to_csv(output_name)
+    print(f"Saved file: {output_name}")
+
+
+for file in FILES:
+    output_name = f"{file[:6].lower()}_v2023_1_cleaned_map.csv"
+    df = pd.read_csv(file)
+    ccsr_csv_cleaner(df, output_name)
+```
