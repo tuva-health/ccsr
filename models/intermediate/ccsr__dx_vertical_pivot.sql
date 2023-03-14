@@ -3,13 +3,13 @@
 with codes as (
     
     select
-        code, 
+        icd_10_cm_code as code, 
         {%- for i in range(1,7) %}
-        trim(ccsr_category_{{ i }}, '''') as ccsr_category_{{ i }},
+        ccsr_category_{{ i }},
         {%- endfor %}
         default_ccsr_category_ip,
         default_ccsr_category_op
-    from {{ ref('ccsr__stg_dx_seed_standin')}}
+    from {{ ref('dxccsr_v2023_1_cleaned_map')}}
 
 ), long_union as (
 
