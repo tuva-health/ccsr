@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: ccsr__dx_vertical_pivot
+  - name: condition
+  - name: ccsr__condition_ccsr_vertical
+  - name: ccsr__stg_dx_seed_standin
+  
+  

@@ -1,0 +1,23 @@
+select
+    encounter_id,
+    patient_id,
+    encounter_type,
+    encounter_start_date,
+    encounter_end_date,
+    admit_source_code,
+    admit_source_description,
+    admit_type_code,
+    admit_type_description,
+    discharge_disposition_code,
+    discharge_disposition_description,
+    rendering_npi,
+    billing_npi,
+    facility_npi,
+    ms_drg_code,
+    ms_drg_description,
+    paid_date,
+    paid_amount,
+    allowed_amount,
+    charge_amount,
+    data_source
+from tuva_claims_demo_full.core.encounter
