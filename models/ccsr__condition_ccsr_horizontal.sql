@@ -47,7 +47,7 @@ select distinct
     {% for category in categories_list %}
     sum(case when ccsr_category = '{{ category }}' then dx_code else 0 end) as DXCCSR_{{ category }},
     {% endfor %}
-    'version' as dxccsr_version
+    {{ var('dxccsr_version') }} as dxccsr_version
 from bool_logic
 group by encounter_id,dxccsr_version
 
