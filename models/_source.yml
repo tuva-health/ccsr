@@ -1,0 +1,9 @@
+version: 2
+
+sources: 
+  - name: ccsr
+    database: "{{ var('input_database') }}"
+    schema: "{{ var('input_schema', 'core') }}"
+    tables:
+      - name: "{{ var('input_condition_table', 'condition') }}"
+      - name: "{{ var('input_procedure_table', 'procedure') }}"

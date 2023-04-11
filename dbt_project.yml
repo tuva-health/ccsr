@@ -1,38 +1,38 @@
-
-# Name your project! Project names should contain only lowercase characters
-# and underscores. A good package name should reflect your organization's
-# name or the intended use of these models
-name: 'ccsr'
-version: '1.0.0'
+name: 'tuva_ccsr'
+version: '0.1.0'
 config-version: 2
 
-# This setting configures which "profile" dbt uses for this project.
-profile: 'default'
+profile: default
 
-# These configurations specify where dbt should look for different types of files.
-# The `model-paths` config, for example, states that models in this project can be
-# found in the "models/" directory. You probably won't need to change these!
+
 model-paths: ["models"]
 analysis-paths: ["analyses"]
 test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
+target-path: "target"
+clean-targets:
+    - "target"
+    - "dbt_packages"
 
-target-path: "target"  # directory which will store compiled SQL files
-clean-targets:         # directories to be removed by `dbt clean`
-  - "target"
-  - "dbt_packages"
 
+vars:
 
-# Configuring models
-# Full documentation: https://docs.getdbt.com/docs/configuring-models
+    # Set input database, schema, and tables where your data is located
+    input_database: tuva_claims_demo_full
+    input_schema: core
+    
+    input_condition_table: condition
+    input_procedure_table: procedure
 
-# In this example config, we tell dbt to build all models in the example/ directory
-# as tables. These settings can be overridden in the individual model files
-# using the `{{ config(...) }}` macro.
-models:
-  ccsr:
-    # Config indicated by + and applies to all files under models/example/
-    example:
-      +materialized: view
+    # These vars enable the wide tables - disabling will exclude wide tables from dbt runs
+    wide_condition_enabled: True
+    wide_procedure_enabled: True
+
+    # Set to "ip" for inpatient data or "op" for outpatient data (More info in the README)
+    record_type: "ip"
+
+    # CCSR Version numbers from HCUP
+    dxccsr_version: "'2023.1'"
+    prccsr_version: "'2023.1'"
