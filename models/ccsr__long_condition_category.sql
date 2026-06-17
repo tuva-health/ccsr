@@ -3,8 +3,17 @@ with ccsr__dx_vertical_pivot as (
     select * from {{ ref('ccsr__dx_vertical_pivot') }} 
 
 ), condition as (
-    
-    select * from {{ source('ccsr', 'condition') }}
+
+    select
+          encounter_id
+        , claim_id
+        , person_id
+        , normalized_code as code
+        , condition_rank as diagnosis_rank
+        , data_source
+    from {{ ref('core__condition') }}
+    where lower(code_system) = 'icd-10-cm'
+      and normalized_code is not null
 
 ), dxccsr_body_systems as (
 
@@ -15,7 +24,7 @@ with ccsr__dx_vertical_pivot as (
 select 
     condition.encounter_id,
     condition.claim_id,
-    condition.patient_id,
+    condition.person_id,
     condition.code,
     ccsr__dx_vertical_pivot.code_description,
     condition.diagnosis_rank,

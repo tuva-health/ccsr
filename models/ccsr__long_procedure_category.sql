@@ -1,6 +1,13 @@
 with procedure as (
-    
-    select * from {{ source('ccsr', 'procedure') }}
+
+    select
+          encounter_id
+        , person_id
+        , normalized_code as code
+        , data_source
+    from {{ ref('core__procedure') }}
+    where lower(code_system) = 'icd-10-pcs'
+      and normalized_code is not null
 
 ), ccsr__procedure_category_map as (
 
@@ -10,7 +17,7 @@ with procedure as (
 
 select distinct
     procedure.encounter_id,
-    procedure.patient_id,
+    procedure.person_id,
     procedure.code,
     ccsr__procedure_category_map.code_description,
     ccsr__procedure_category_map.ccsr_parent_category,

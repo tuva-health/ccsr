@@ -8,7 +8,7 @@ with dedupe_records as (
 
     select distinct
         encounter_id,
-        patient_id,
+        person_id,
         ccsr_category
     from {{ ref('ccsr__long_procedure_category') }} 
 
@@ -16,7 +16,7 @@ with dedupe_records as (
 
 select
     encounter_id,
-    patient_id,
+    person_id,
     -- pivot rows into column values for each possible CCSR category
     {% for category in categories_list %}
     -- as we don't rank procedure codes, we encode to 0 or 1 instead of 0-3
@@ -25,4 +25,4 @@ select
     {{ var('prccsr_version') }} as prccsr_version,
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
 from dedupe_records
-group by encounter_id, patient_id, prccsr_version, _model_run_time
+group by encounter_id, person_id, prccsr_version, _model_run_time

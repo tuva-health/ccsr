@@ -90,7 +90,7 @@ models:
                 severity: warn
       - name: claim_id
         description: Unique identifier for each claim.
-      - name: patient_id
+      - name: person_id
         description: Unique identifier for each patient.
       - name: code
         description: "The ICD-10-CM code for the diagnosis."
@@ -152,7 +152,7 @@ models:
         description: Unique identifier for an encounter.
       - name: claim_id
         description: Unique claim_id for each claim.
-      - name: patient_id
+      - name: person_id
         description: Unique identifier for each patient.
       - name: dxccsr_version
         description: The version number of the CCSR program from which the dbt model was derived.
@@ -185,7 +185,7 @@ models:
           - unique:
               config:
                 severity: warn
-      - name: patient_id
+      - name: person_id
         description: Unique identifier for each patient.
       - name: body_system
         description: The body system to which each parent category belongs. The 22 body systems generally follow the structure of the ICD-10-CM diagnosis chapters.
@@ -225,7 +225,7 @@ models:
             - not_null:
                 config:
                   severity: warn
-      - name: patient_id
+      - name: person_id
         description: Unique identifier for each patient.
       - name: code
         description: The ICD-10-PCS code for the procedure.
@@ -274,7 +274,7 @@ models:
             - not_null:
                 config:
                   severity: warn
-      - name: patient_id
+      - name: person_id
         description: Unique identifier for each patient.
       - name: prccsr_version
         description: The version number of the CCSR program from which the dbt model was derived.

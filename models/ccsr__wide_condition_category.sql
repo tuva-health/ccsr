@@ -11,13 +11,13 @@ with bool_ranks as (
     select 
         encounter_id,
         claim_id,
-        patient_id,
+        person_id,
         ccsr_category,
         ccsr_category like 'XXX%' as is_excluded,
-        booland_agg(diagnosis_rank = 1) as is_only_first,
-        boolor_agg(diagnosis_rank = 1) as is_first,
-        boolor_agg(diagnosis_rank >= 1) as is_nth,
-        boolor_agg(diagnosis_rank > 1) as not_first
+        {{ ccsr_bool_and('diagnosis_rank = 1') }} as is_only_first,
+        {{ ccsr_bool_or('diagnosis_rank = 1') }} as is_first,
+        {{ ccsr_bool_or('diagnosis_rank >= 1') }} as is_nth,
+        {{ ccsr_bool_or('diagnosis_rank > 1') }} as not_first
     from {{ ref('ccsr__long_condition_category') }}
     {{ dbt_utils.group_by(n=5) }}
 
@@ -26,7 +26,7 @@ with bool_ranks as (
     select distinct
         encounter_id,
         claim_id,
-        patient_id,
+        person_id,
         ccsr_category,
         -- assigns one of four values for each DXCCSR data element as per pg 25 of DXCCSR User guide v2023.1
         case 
@@ -43,7 +43,7 @@ with bool_ranks as (
 select distinct
     encounter_id,
     claim_id,
-    patient_id,
+    person_id,
     -- pivot rows into column values for each possible CCSR category
     {% for category in categories_list %}
     sum(case when ccsr_category = '{{ category }}' then dx_code else 0 end) as dxccsr_{{ category }},
@@ -51,4 +51,4 @@ select distinct
     {{ var('dxccsr_version') }} as dxccsr_version,
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
 from bool_logic
-group by encounter_id, claim_id, patient_id, dxccsr_version, _model_run_time
+group by encounter_id, claim_id, person_id, dxccsr_version, _model_run_time
