@@ -3,7 +3,7 @@
 # CCSR Grouper
 
 ## 🔗  Quick Links
-- [Docs](https://tuva-health.github.io/the_tuva_project/#!/overview): Learn about the Tuva Project data model
+- [Docs](https://thetuvaproject.com/data-marts/ccsr): Learn about the Tuva Project data model
 - [Knowledge Base](https://thetuvaproject.com/docs/intro): Learn about claims data fundamentals and how to do claims data analytics
 <br/><br/>
 
