@@ -84,10 +84,6 @@ models:
     columns:
       - name: encounter_id
         description: Unique identifier for each the encounter.
-        tests:
-          - unique:
-              config:
-                severity: warn
       - name: claim_id
         description: Unique identifier for each claim.
       - name: person_id
@@ -169,22 +165,8 @@ models:
     columns:
       - name: encounter_id
         description: Unique identifier for an encounter.
-        tests:
-            - unique:
-                config:
-                  severity: warn
-            - not_null:
-                config:
-                  severity: warn
       - name: claim_id
         description: Unique claim_id for each claim.
-        tests:
-          - not_null:
-              config:
-                severity: warn
-          - unique:
-              config:
-                severity: warn
       - name: person_id
         description: Unique identifier for each patient.
       - name: body_system

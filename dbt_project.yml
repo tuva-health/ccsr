@@ -19,13 +19,6 @@ clean-targets:
 
 vars:
 
-    # Set input database, schema, and tables where your data is located
-    input_database: tuva_claims_demo_full
-    input_schema: core
-    
-    input_condition_table: condition
-    input_procedure_table: procedure
-
     # These vars enable the wide tables - disabling will exclude wide tables from dbt runs
     wide_condition_enabled: True
     wide_procedure_enabled: True
