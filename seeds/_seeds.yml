@@ -5,10 +5,44 @@ seeds:
     description: A table containing the CSV mapping file included with the DXCCSR SAS program.
       The original CSV was not natively seedable, and the file was transformed with the coded included in the README.
       For each ICD-10-CM code, the table contains up to six CCSR category codes and a default CCSR category code.
+    config:
+      column_types:
+        icd_10_cm_code: &string_type |
+          {%- if target.type in ("bigquery", "databricks") -%} string {%- else -%} varchar(256) {%- endif -%}
+        icd_10_cm_code_description: &description_type |
+          {%- if target.type in ("bigquery", "databricks") -%} string {%- else -%} varchar(1000) {%- endif -%}
+        default_ccsr_category_ip: *string_type
+        default_ccsr_category_description_ip: *description_type
+        default_ccsr_category_op: *string_type
+        default_ccsr_category_description_op: *description_type
+        ccsr_category_1: *string_type
+        ccsr_category_1_description: *description_type
+        ccsr_category_2: *string_type
+        ccsr_category_2_description: *description_type
+        ccsr_category_3: *string_type
+        ccsr_category_3_description: *description_type
+        ccsr_category_4: *string_type
+        ccsr_category_4_description: *description_type
+        ccsr_category_5: *string_type
+        ccsr_category_5_description: *description_type
+        ccsr_category_6: *string_type
+        ccsr_category_6_description: *description_type
   - name: prccsr_v2023_1_cleaned_map
     description: A table containing the CSV mapping file included with the PRCCSR SAS program.
       The original CSV was not natively seedable, and the file was transformed with the coded included in the README.
+    config:
+      column_types:
+        icd_10_pcs: *string_type
+        icd_10_pcs_description: *description_type
+        prccsr: *string_type
+        prccsr_description: *description_type
+        clinical_domain: *string_type
   - name: dxccsr_v2023_1_body_systems
     description: |
       A table containing descriptions of the top level categories used in the CCSR condition mapper.
       This was manually exctracted from the User Guide PDF included with the DXCCSR SAS program.
+    config:
+      column_types:
+        body_system: *string_type
+        ccsr_parent_category: *string_type
+        parent_category_description: *description_type
