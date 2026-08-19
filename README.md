@@ -1,4 +1,4 @@
-[![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![dbt logo and version](https://img.shields.io/static/v1?logo=dbt&label=dbt-version&message=1.2.x&color=orange)
+[![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![dbt logo and version](https://img.shields.io/static/v1?logo=dbt&label=dbt-version&message=1.10%2B&color=orange)
 
 # CCSR Grouper
 
@@ -81,6 +81,18 @@ for file in FILES:
     df = pd.read_csv(file)
     ccsr_csv_cleaner(df, output_name)
 ```
+
+## Data assets
+
+The released CSV contents are stored as an immutable snapshot under
+`s3://tuva-public-resources/ccsr/<package-version>/`. The checked-in CSV files
+contain only the headers required by dbt, and `data_assets.yml` is the
+publisher inventory. Updating a mapping requires a new package release.
+
+On a version-changing push to `main`, or a manual recovery from current
+`main`, release automation verifies the exact, commit-bound, byte-identical
+`_release.json` receipt in S3, GCS, and Azure before creating the
+`v<package-version>` tag and draft GitHub release.
 <br/><br/>
 
 ## 🔌  Supported Databases and dbt Versions
@@ -88,7 +100,7 @@ for file in FILES:
 This package has been tested on: 
 - Snowflake
 
-This package supports dbt version `1.4.x` or higher.
+This package supports dbt version `1.10.0` or higher.
 <br/><br/>
 
 ## 🙋🏻‍♀️ How is this package maintained and how do I contribute?
@@ -101,4 +113,3 @@ Have an opinion on the mappings? Notice any bugs when installing and running the
 ## 🤝 Join our community!
 
 Join our growing community of healthcare data practitioners in [Slack](https://join.slack.com/t/thetuvaproject/shared_invite/zt-16iz61187-G522Mc2WGA2mHF57e0il0Q)!
-
