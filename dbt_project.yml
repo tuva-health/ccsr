@@ -1,5 +1,5 @@
-name: 'tuva_ccsr'
-version: '1.0.0'
+name: 'ccsr'
+version: '1.0.1'
 config-version: 2
 require-dbt-version: ">=1.10.0"
 
@@ -18,13 +18,13 @@ clean-targets:
     - "dbt_packages"
 
 seeds:
-    tuva_ccsr:
+    ccsr:
         dxccsr_v2023_1_body_systems:
-            +post-hook: "{{ the_tuva_project.load_package_seed('tuva_ccsr', 'ccsr', 'dxccsr_v2023_1_body_systems.csv.gz') }}"
+            +post-hook: "{{ the_tuva_project.load_package_seed('ccsr', 'ccsr', 'dxccsr_v2023_1_body_systems.csv.gz') }}"
         dxccsr_v2023_1_cleaned_map:
-            +post-hook: "{{ the_tuva_project.load_package_seed('tuva_ccsr', 'ccsr', 'dxccsr_v2023_1_cleaned_map.csv.gz') }}"
+            +post-hook: "{{ the_tuva_project.load_package_seed('ccsr', 'ccsr', 'dxccsr_v2023_1_cleaned_map.csv.gz') }}"
         prccsr_v2023_1_cleaned_map:
-            +post-hook: "{{ the_tuva_project.load_package_seed('tuva_ccsr', 'ccsr', 'prccsr_v2023_1_cleaned_map.csv.gz') }}"
+            +post-hook: "{{ the_tuva_project.load_package_seed('ccsr', 'ccsr', 'prccsr_v2023_1_cleaned_map.csv.gz') }}"
 
 
 vars:
