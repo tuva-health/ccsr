@@ -27,7 +27,7 @@ models:
           6 CCSR categories associated, ordinally ranked by the ccsr_category_rank.
           The not_null test will fail on this dimension if a record has a `code` that isn't
           referenced in the CCSR seed file."
-        tests:
+        data_tests:
           - not_null:
               config:
                 severity: warn
@@ -107,7 +107,7 @@ models:
           6 CCSR categories associated, ordinally ranked by the ccsr_category_rank.
           The not_null test will fail on this dimension if a record has a `code` that isn't
           referenced in the CCSR seed file."
-        tests:
+        data_tests:
           - not_null:
               config:
                 severity: warn
@@ -181,7 +181,7 @@ models:
           6 CCSR categories associated, ordinally ranked by the ccsr_category_rank.
           The not_null test will fail on this dimension if a record has a `code` that isn't
           referenced in the CCSR seed file."
-        tests:
+        data_tests:
             - not_null:
                 config:
                   severity: warn
@@ -203,7 +203,7 @@ models:
     columns:
       - name: encounter_id
         description: The encounter_id for the encounter where this procedure was performed.
-        tests:
+        data_tests:
             - not_null:
                 config:
                   severity: warn
@@ -222,7 +222,7 @@ models:
         description: A description of the clinical domain.
       - name: ccsr_category
         description: The CCSR category mapped to the ICD-10-PCS code.
-        tests:
+        data_tests:
             - not_null:
                 config:
                   severity: warn
@@ -251,7 +251,7 @@ models:
     columns:
       - name: encounter_id
         description: The encounter_id for the encounter where this procedure was performed.
-        tests:
+        data_tests:
             - unique
             - not_null:
                 config:
