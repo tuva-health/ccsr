@@ -7,17 +7,20 @@
 
 with bool_ranks as (
 
-    -- bool agg functions will reduce the long table to one row per CCSR category per encounter
+    -- bool agg functions will reduce the long table to one row per CCSR category per encounter.
+    -- the_tuva_project.bool_and_agg / bool_or_agg dispatch per adapter
+    -- (booland_agg/boolor_agg on Snowflake, logical_and/logical_or on BigQuery,
+    --  a bit-cast min/max on Fabric, ANSI bool_and/bool_or elsewhere).
     select 
         encounter_id,
         claim_id,
         person_id,
         ccsr_category,
         ccsr_category like 'XXX%' as is_excluded,
-        {{ ccsr_bool_and('diagnosis_rank = 1') }} as is_only_first,
-        {{ ccsr_bool_or('diagnosis_rank = 1') }} as is_first,
-        {{ ccsr_bool_or('diagnosis_rank >= 1') }} as is_nth,
-        {{ ccsr_bool_or('diagnosis_rank > 1') }} as not_first
+        {{ the_tuva_project.bool_and_agg('diagnosis_rank = 1') }} as is_only_first,
+        {{ the_tuva_project.bool_or_agg('diagnosis_rank = 1') }} as is_first,
+        {{ the_tuva_project.bool_or_agg('diagnosis_rank >= 1') }} as is_nth,
+        {{ the_tuva_project.bool_or_agg('diagnosis_rank > 1') }} as not_first
     from {{ ref('ccsr__long_condition_category') }}
     {{ dbt_utils.group_by(n=5) }}
 
