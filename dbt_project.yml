@@ -20,14 +20,16 @@ clean-targets:
 seeds:
     ccsr:
         dxccsr_v2023_1_body_systems:
-            +post-hook: "{{ the_tuva_project.load_package_seed('ccsr', ccsr.get_ccsr_package_version(), 'dxccsr_v2023_1_body_systems.csv.gz') }}"
+            +post-hook: "{{ the_tuva_project.load_package_seed('data-marts/ccsr', var('ccsr_data_asset_version'), 'dxccsr_v2023_1_body_systems.csv.gz') }}"
         dxccsr_v2023_1_cleaned_map:
-            +post-hook: "{{ the_tuva_project.load_package_seed('ccsr', ccsr.get_ccsr_package_version(), 'dxccsr_v2023_1_cleaned_map.csv.gz') }}"
+            +post-hook: "{{ the_tuva_project.load_package_seed('data-marts/ccsr', var('ccsr_data_asset_version'), 'dxccsr_v2023_1_cleaned_map.csv.gz') }}"
         prccsr_v2023_1_cleaned_map:
-            +post-hook: "{{ the_tuva_project.load_package_seed('ccsr', ccsr.get_ccsr_package_version(), 'prccsr_v2023_1_cleaned_map.csv.gz') }}"
+            +post-hook: "{{ the_tuva_project.load_package_seed('data-marts/ccsr', var('ccsr_data_asset_version'), 'prccsr_v2023_1_cleaned_map.csv.gz') }}"
 
 
 vars:
+
+    ccsr_data_asset_version: "1.0.0"
 
     # These vars enable the wide tables - disabling will exclude wide tables from dbt runs
     wide_condition_enabled: True
