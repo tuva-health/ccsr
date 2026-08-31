@@ -5,24 +5,21 @@
 ) %}
 
 
-with bool_ranks as (
+with boolean_ranks as (
 
-    -- bool agg functions will reduce the long table to one row per CCSR category per encounter.
-    -- the_tuva_project.bool_and_agg / bool_or_agg dispatch per adapter
-    -- (booland_agg/boolor_agg on Snowflake, logical_and/logical_or on BigQuery,
-    --  a bit-cast min/max on Fabric, ANSI bool_and/bool_or elsewhere).
+    -- Reduce the long table to one row per CCSR category per encounter.
+    -- Integer min/max preserves boolean AND/OR semantics across adapters.
     select 
         encounter_id,
         claim_id,
         person_id,
         ccsr_category,
-        ccsr_category like 'XXX%' as is_excluded,
-        {{ the_tuva_project.bool_and_agg('diagnosis_rank = 1') }} as is_only_first,
-        {{ the_tuva_project.bool_or_agg('diagnosis_rank = 1') }} as is_first,
-        {{ the_tuva_project.bool_or_agg('diagnosis_rank >= 1') }} as is_nth,
-        {{ the_tuva_project.bool_or_agg('diagnosis_rank > 1') }} as not_first
+        min(case when diagnosis_rank = 1 then 1 else 0 end) as is_only_first,
+        max(case when diagnosis_rank = 1 then 1 else 0 end) as is_first,
+        max(case when diagnosis_rank >= 1 then 1 else 0 end) as is_nth,
+        max(case when diagnosis_rank > 1 then 1 else 0 end) as not_first
     from {{ ref('ccsr__long_condition_category') }}
-    {{ dbt_utils.group_by(n=5) }}
+    group by encounter_id, claim_id, person_id, ccsr_category
 
 ), bool_logic as (
 
@@ -33,13 +30,13 @@ with bool_ranks as (
         ccsr_category,
         -- assigns one of four values for each DXCCSR data element as per pg 25 of DXCCSR User guide v2023.1
         case 
-            when not is_nth then 0
-            when is_only_first and not is_excluded then 1
-            when is_first and is_nth and not is_excluded then 2
-            when not_first then 3 
+            when is_nth = 0 then 0
+            when is_only_first = 1 and ccsr_category not like 'XXX%' then 1
+            when is_first = 1 and is_nth = 1 and ccsr_category not like 'XXX%' then 2
+            when not_first = 1 then 3
             else -99 
             end as dx_code
-    from bool_ranks 
+    from boolean_ranks
 
 )
 
@@ -54,4 +51,4 @@ select distinct
     {{ var('dxccsr_version') }} as dxccsr_version,
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
 from bool_logic
-group by encounter_id, claim_id, person_id, dxccsr_version, _model_run_time
+group by encounter_id, claim_id, person_id

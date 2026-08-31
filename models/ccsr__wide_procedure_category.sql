@@ -25,4 +25,4 @@ select
     {{ var('prccsr_version') }} as prccsr_version,
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
 from dedupe_records
-group by encounter_id, person_id, prccsr_version, _model_run_time
+group by encounter_id, person_id

@@ -38,8 +38,10 @@ select
     ccsr__dx_vertical_pivot.is_op_default_category,
     {{ var('dxccsr_version') }} as dxccsr_version,
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
-from condition 
-left join ccsr__dx_vertical_pivot using(code)
-left join dxccsr_body_systems using(ccsr_parent_category)
+from condition
+left join ccsr__dx_vertical_pivot
+    on condition.code = ccsr__dx_vertical_pivot.code
+left join dxccsr_body_systems
+    on ccsr__dx_vertical_pivot.ccsr_parent_category = dxccsr_body_systems.ccsr_parent_category
 
     

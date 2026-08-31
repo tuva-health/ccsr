@@ -11,5 +11,5 @@ select
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
 from {{ref('ccsr__long_condition_category')}}
 where 
-    is_{{ var('record_type', 'ip') }}_default_category = true
+    is_{{ var('record_type', 'ip') }}_default_category = cast(1 as {{ dbt.type_boolean() }})
     and diagnosis_rank = 1
