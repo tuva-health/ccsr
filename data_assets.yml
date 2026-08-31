@@ -1,9 +1,0 @@
-schema_version: 1
-package: ccsr
-assets:
-  - seed: dxccsr_v2023_1_body_systems
-    path: dxccsr_v2023_1_body_systems.csv.gz
-  - seed: dxccsr_v2023_1_cleaned_map
-    path: dxccsr_v2023_1_cleaned_map.csv.gz
-  - seed: prccsr_v2023_1_cleaned_map
-    path: prccsr_v2023_1_cleaned_map.csv.gz
