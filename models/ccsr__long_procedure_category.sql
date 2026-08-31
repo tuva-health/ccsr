@@ -1,7 +1,9 @@
 with procedure_records as (
 
     select
-          encounter_id
+          procedure_id
+        , encounter_id
+        , claim_id
         , person_id
         , normalized_code as code
         , data_source
@@ -16,8 +18,11 @@ with procedure_records as (
 )
 
 select distinct
+    procedure_records.procedure_id,
     procedure_records.encounter_id,
+    procedure_records.claim_id,
     procedure_records.person_id,
+    procedure_records.data_source,
     procedure_records.code,
     ccsr__procedure_category_map.code_description,
     ccsr__procedure_category_map.ccsr_parent_category,

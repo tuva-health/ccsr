@@ -88,6 +88,10 @@ models:
         description: Unique identifier for each claim.
       - name: person_id
         description: Unique identifier for each patient.
+      - name: data_source
+        description: Source system associated with the condition record.
+        data_tests:
+          - not_null
       - name: code
         description: "The ICD-10-CM code for the diagnosis."
       - name: code_description
@@ -143,6 +147,14 @@ models:
 
         This table doesn't include any category descriptions, but category and parent category descriptions
         can be found by querying the target column name against the `ccsr__dx_vertical_pivot` intermediate model. 
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - encounter_id
+              - claim_id
+              - person_id
+              - data_source
     columns:
       - name: encounter_id
         description: Unique identifier for an encounter.
@@ -150,6 +162,10 @@ models:
         description: Unique claim_id for each claim.
       - name: person_id
         description: Unique identifier for each patient.
+      - name: data_source
+        description: Source system included in the condition output grain.
+        data_tests:
+          - not_null
       - name: dxccsr_version
         description: The version number of the CCSR program from which the dbt model was derived.
       - name: _model_run_time
@@ -169,6 +185,10 @@ models:
         description: Unique claim_id for each claim.
       - name: person_id
         description: Unique identifier for each patient.
+      - name: data_source
+        description: Source system included in the condition output grain.
+        data_tests:
+          - not_null
       - name: body_system
         description: The body system to which each parent category belongs. The 22 body systems generally follow the structure of the ICD-10-CM diagnosis chapters.
           Note that the procedure tables don't have this column, but a conceptually related field in procedure models is `clinical_domain`.
@@ -200,7 +220,16 @@ models:
     config:
       tags: ccsr
       materialized: table
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - procedure_id
+              - data_source
+              - ccsr_category
     columns:
+      - name: procedure_id
+        description: Unique identifier for the source procedure record.
       - name: encounter_id
         description: The encounter_id for the encounter where this procedure was performed.
         data_tests:
@@ -209,6 +238,12 @@ models:
                   severity: warn
       - name: person_id
         description: Unique identifier for each patient.
+      - name: claim_id
+        description: Unique identifier for the associated claim when available.
+      - name: data_source
+        description: Source system included in the procedure output grain.
+        data_tests:
+          - not_null
       - name: code
         description: The ICD-10-PCS code for the procedure.
       - name: code_description
@@ -248,16 +283,25 @@ models:
 
       This table doesn't include any category descriptions, but category and parent category descriptions
       can be found by querying the target column name against the `ccsr_procedure_category_map` intermediate model. 
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - encounter_id
+              - data_source
     columns:
       - name: encounter_id
         description: The encounter_id for the encounter where this procedure was performed.
         data_tests:
-            - unique
             - not_null:
                 config:
                   severity: warn
       - name: person_id
         description: Unique identifier for each patient.
+      - name: data_source
+        description: Source system included in the procedure output grain.
+        data_tests:
+          - not_null
       - name: prccsr_version
         description: The version number of the CCSR program from which the dbt model was derived.
       - name: _model_run_time
