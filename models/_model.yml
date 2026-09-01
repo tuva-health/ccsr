@@ -292,8 +292,9 @@ models:
       tags: ccsr
       materialized: table
     description: >
-      Source-scoped procedure volume patterns by CCSR category, ICD-10-PCS
-      root operation, and approach.
+      Source-scoped claim-linked procedure volume patterns by CCSR category,
+      ICD-10-PCS root operation, and approach. Procedures without a claim ID
+      are excluded from the occurrence counts.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
@@ -318,11 +319,11 @@ models:
       - name: approach
         description: The ICD-10-PCS approach associated with the procedure.
       - name: n_occurrences_with_approach
-        description: Number of source-scoped procedures for the category, operation, and approach.
+        description: Number of source-scoped claim-linked procedures for the category, operation, and approach.
       - name: n_total_occurrences
-        description: Total source-scoped procedures for the category and operation.
+        description: Total source-scoped claim-linked procedures for the category and operation.
       - name: approach_rate
-        description: Percentage of category and operation procedures performed with the approach.
+        description: Percentage of claim-linked category and operation procedures performed with the approach.
       - name: _model_run_time
         description: The time at which the model was materialized.
 

@@ -6,7 +6,8 @@ with procedure_base as (
         ccsr_category_description,
         operation,
         approach,
-        count(*) over (
+        claim_id,
+        count(claim_id) over (
             partition by data_source, ccsr_category, operation
         ) as n_total_occurrences
     from {{ ref('ccsr__long_procedure_category') }}
@@ -20,7 +21,7 @@ with procedure_base as (
         ccsr_category_description,
         operation,
         approach,
-        count(*) as n_occurrences_with_approach,
+        count(claim_id) as n_occurrences_with_approach,
         n_total_occurrences
     from procedure_base
     group by

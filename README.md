@@ -17,7 +17,7 @@ The [Clinical Classications Software Refined (CCSR)](https://hcup-us.ahrq.gov/to
 * **DXCCSR - Output Option 1, Vertical Output File:** `ccsr__long_condition_category`. This table includes description columns provided by the CCSR seed file but not defined in the the SAS program.
 * **DXCCSR - Output Option 2, Horizontal Output File:** `ccsr__wide_condition_category`
 * **DXCCSR - Output Option 3, Optional File with Default Assignment for Principal or First-Listed Diagnosis:** `ccsr__singular_condition_category`
-* **Procedure volume summary:** `ccsr__procedure_summary` reports source-scoped procedure volumes and approach rates by CCSR category and root operation.
+* **Procedure volume summary:** `ccsr__procedure_summary` reports source-scoped, claim-linked procedure volumes and approach rates by CCSR category and root operation, preserving the retained behavior that procedures without a claim ID do not contribute to the counts.
 
 Tuva 1.0 intentionally retains the reviewed DXCCSR and PRCCSR v2023.1
 mappings. A later CCSR mapping release will be published as a separate data

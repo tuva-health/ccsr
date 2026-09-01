@@ -187,8 +187,9 @@ unit_tests:
 
   - name: test_procedure_summary_is_source_scoped
     description: >
-      Reused category and operation values calculate independent procedure
-      totals and approach rates in each source.
+      Reused category and operation values calculate independent claim-linked
+      procedure totals and approach rates in each source, preserving the
+      retained behavior that excludes clinical procedures with no claim ID.
     model: ccsr__procedure_summary
     given:
       - input: ref('ccsr__long_procedure_category')
@@ -196,14 +197,17 @@ unit_tests:
         rows: |
           select
               'source-a' as data_source
+            , 'claim-1' as claim_id
             , 'CAR001' as ccsr_category
             , 'Test category' as ccsr_category_description
             , 'Bypass' as operation
             , 'Open' as approach
           union all
-          select 'source-a', 'CAR001', 'Test category', 'Bypass', 'Percutaneous'
+          select 'source-a', 'claim-2', 'CAR001', 'Test category', 'Bypass', 'Percutaneous'
           union all
-          select 'source-b', 'CAR001', 'Test category', 'Bypass', 'Open'
+          select 'source-a', null, 'CAR001', 'Test category', 'Bypass', 'Open'
+          union all
+          select 'source-b', 'claim-3', 'CAR001', 'Test category', 'Bypass', 'Open'
     expect:
       rows:
         - data_source: source-a
