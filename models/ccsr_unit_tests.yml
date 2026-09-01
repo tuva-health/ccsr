@@ -1,0 +1,146 @@
+version: 2
+
+unit_tests:
+  - name: test_long_condition_category_preserves_data_source
+    description: >
+      Reused condition identifiers in different sources remain independently
+      attributable after diagnosis-category mapping.
+    model: ccsr__long_condition_category
+    given:
+      - input: ref('core__condition')
+        format: sql
+        rows: |
+          select
+              'encounter-1' as encounter_id
+            , 'claim-1' as claim_id
+            , 'person-1' as person_id
+            , 'A000' as normalized_code
+            , 1 as condition_rank
+            , 'icd-10-cm' as code_system
+            , 'source-a' as data_source
+          union all
+          select
+              'encounter-1', 'claim-1', 'person-1', 'A000', 1,
+              'icd-10-cm', 'source-b'
+      - input: ref('ccsr__dx_vertical_pivot')
+        format: sql
+        rows: |
+          select
+              'A000' as code
+            , 'Test diagnosis' as code_description
+            , 'INF' as ccsr_parent_category
+            , 'INF001' as ccsr_category
+            , 'Test category' as ccsr_category_description
+            , 1 as ccsr_category_rank
+            , 1 as is_ip_default_category
+            , 1 as is_op_default_category
+      - input: ref('dxccsr_v2023_1_body_systems')
+        format: sql
+        rows: |
+          select
+              'INF' as ccsr_parent_category
+            , 'Infections' as body_system
+            , 'Test parent category' as parent_category_description
+    expect:
+      rows:
+        - encounter_id: encounter-1
+          claim_id: claim-1
+          person_id: person-1
+          data_source: source-a
+          code: A000
+          ccsr_category: INF001
+        - encounter_id: encounter-1
+          claim_id: claim-1
+          person_id: person-1
+          data_source: source-b
+          code: A000
+          ccsr_category: INF001
+
+  - name: test_long_procedure_category_preserves_source_record_identity
+    description: >
+      Procedure records sharing encounter, person, and code values remain
+      distinct by procedure, claim, and data source after category mapping.
+    model: ccsr__long_procedure_category
+    given:
+      - input: ref('core__procedure')
+        format: sql
+        rows: |
+          select
+              'procedure-1' as procedure_id
+            , 'encounter-1' as encounter_id
+            , 'claim-1' as claim_id
+            , 'person-1' as person_id
+            , '0016070' as normalized_code
+            , 'icd-10-pcs' as code_system
+            , 'source-a' as data_source
+          union all
+          select
+              'procedure-2', 'encounter-1', 'claim-2', 'person-1',
+              '0016070', 'icd-10-pcs', 'source-a'
+          union all
+          select
+              'procedure-1', 'encounter-1', 'claim-1', 'person-1',
+              '0016070', 'icd-10-pcs', 'source-b'
+      - input: ref('ccsr__procedure_category_map')
+        format: sql
+        rows: |
+          select
+              '0016070' as code
+            , 'Test procedure' as code_description
+            , 'CAR' as ccsr_parent_category
+            , 'CAR001' as ccsr_category
+            , 'Test category' as ccsr_category_description
+            , 'Cardiovascular' as clinical_domain
+    expect:
+      rows:
+        - procedure_id: procedure-1
+          encounter_id: encounter-1
+          claim_id: claim-1
+          person_id: person-1
+          data_source: source-a
+          code: '0016070'
+          ccsr_category: CAR001
+        - procedure_id: procedure-2
+          encounter_id: encounter-1
+          claim_id: claim-2
+          person_id: person-1
+          data_source: source-a
+          code: '0016070'
+          ccsr_category: CAR001
+        - procedure_id: procedure-1
+          encounter_id: encounter-1
+          claim_id: claim-1
+          person_id: person-1
+          data_source: source-b
+          code: '0016070'
+          ccsr_category: CAR001
+
+  - name: test_wide_procedure_category_keeps_one_horizontal_row_per_encounter
+    description: >-
+      Multiple procedures on one encounter contribute category indicators to
+      one source-scoped horizontal record instead of producing sparse rows.
+    model: ccsr__wide_procedure_category
+    overrides:
+      vars:
+        _ccsr_procedure_categories_override: [CAR001, DIG001]
+    given:
+      - input: ref('ccsr__long_procedure_category')
+        format: sql
+        rows: |
+          select
+              'procedure-1' as procedure_id
+            , 'encounter-1' as encounter_id
+            , 'claim-1' as claim_id
+            , 'person-1' as person_id
+            , 'source-a' as data_source
+            , 'CAR001' as ccsr_category
+          union all
+          select
+              'procedure-2', 'encounter-1', 'claim-2', 'person-1', 'source-a', 'DIG001'
+          union all
+          select
+              'procedure-1', 'encounter-1', 'claim-1', 'person-1', 'source-b', 'CAR001'
+    expect:
+      rows:
+        - {encounter_id: encounter-1, person_id: person-1, data_source: source-a, prccsr_car001: 1, prccsr_dig001: 1}
+        - {encounter_id: encounter-1, person_id: person-1, data_source: source-b, prccsr_car001: 1, prccsr_dig001: 0}

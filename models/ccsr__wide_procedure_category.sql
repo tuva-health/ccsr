@@ -1,14 +1,18 @@
-{% set categories_list = dbt_utils.get_column_values(
-        table=ref("ccsr__procedure_category_map"),
-        column="ccsr_category",
-        order_by="ccsr_category"
-) %}
+{% set categories_list = var('_ccsr_procedure_categories_override', none) %}
+{% if categories_list is none %}
+    {% set categories_list = dbt_utils.get_column_values(
+            table=ref("ccsr__procedure_category_map"),
+            column="ccsr_category",
+            order_by="ccsr_category"
+    ) %}
+{% endif %}
 
 with dedupe_records as (
 
     select distinct
         encounter_id,
         person_id,
+        data_source,
         ccsr_category
     from {{ ref('ccsr__long_procedure_category') }} 
 
@@ -17,6 +21,7 @@ with dedupe_records as (
 select
     encounter_id,
     person_id,
+    data_source,
     -- pivot rows into column values for each possible CCSR category
     {% for category in categories_list %}
     -- as we don't rank procedure codes, we encode to 0 or 1 instead of 0-3
@@ -25,4 +30,4 @@ select
     {{ var('prccsr_version') }} as prccsr_version,
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
 from dedupe_records
-group by encounter_id, person_id
+group by encounter_id, person_id, data_source

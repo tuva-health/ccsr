@@ -1,0 +1,24 @@
+name: integration_tests
+version: '1.0.0'
+config-version: 2
+
+profile: default
+
+vars:
+  claims_enabled: false
+  clinical_enabled: false
+  provider_attribution_enabled: false
+
+model-paths: ["models"]
+test-paths: ["tests"]
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  integration_tests:
+    +materialized: view
+
+flags:
+  require_generic_test_arguments_property: true
+  require_ref_searches_node_package_before_root: true

@@ -13,13 +13,14 @@ with boolean_ranks as (
         encounter_id,
         claim_id,
         person_id,
+        data_source,
         ccsr_category,
         min(case when diagnosis_rank = 1 then 1 else 0 end) as is_only_first,
         max(case when diagnosis_rank = 1 then 1 else 0 end) as is_first,
         max(case when diagnosis_rank >= 1 then 1 else 0 end) as is_nth,
         max(case when diagnosis_rank > 1 then 1 else 0 end) as not_first
     from {{ ref('ccsr__long_condition_category') }}
-    group by encounter_id, claim_id, person_id, ccsr_category
+    group by encounter_id, claim_id, person_id, data_source, ccsr_category
 
 ), bool_logic as (
 
@@ -27,6 +28,7 @@ with boolean_ranks as (
         encounter_id,
         claim_id,
         person_id,
+        data_source,
         ccsr_category,
         -- assigns one of four values for each DXCCSR data element as per pg 25 of DXCCSR User guide v2023.1
         case 
@@ -44,6 +46,7 @@ select distinct
     encounter_id,
     claim_id,
     person_id,
+    data_source,
     -- pivot rows into column values for each possible CCSR category
     {% for category in categories_list %}
     sum(case when ccsr_category = '{{ category }}' then dx_code else 0 end) as dxccsr_{{ category }},
@@ -51,4 +54,4 @@ select distinct
     {{ var('dxccsr_version') }} as dxccsr_version,
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
 from bool_logic
-group by encounter_id, claim_id, person_id
+group by encounter_id, claim_id, person_id, data_source

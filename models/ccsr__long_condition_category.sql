@@ -25,6 +25,7 @@ select
     condition.encounter_id,
     condition.claim_id,
     condition.person_id,
+    condition.data_source,
     condition.code,
     ccsr__dx_vertical_pivot.code_description,
     condition.diagnosis_rank,

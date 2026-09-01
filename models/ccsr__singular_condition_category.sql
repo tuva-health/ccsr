@@ -2,6 +2,7 @@ select
     encounter_id,
     claim_id,
     person_id,
+    data_source,
     ccsr_category,
     ccsr_category_description,
     ccsr_parent_category,
