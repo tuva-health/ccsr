@@ -32,8 +32,8 @@ unit_tests:
             , 'INF001' as ccsr_category
             , 'Test category' as ccsr_category_description
             , 1 as ccsr_category_rank
-            , true as is_ip_default_category
-            , true as is_op_default_category
+            , 1 as is_ip_default_category
+            , 1 as is_op_default_category
       - input: ref('dxccsr_v2023_1_body_systems')
         format: sql
         rows: |
