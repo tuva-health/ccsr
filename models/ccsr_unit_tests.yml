@@ -91,6 +91,11 @@ unit_tests:
             , 'CAR001' as ccsr_category
             , 'Test category' as ccsr_category_description
             , 'Cardiovascular' as clinical_domain
+            , 'Medical and Surgical' as procedure_section
+            , 'Bypass' as operation
+            , 'Open' as approach
+            , 'No Device' as device
+            , 'No Qualifier' as qualifier
     expect:
       rows:
         - procedure_id: procedure-1
@@ -144,3 +149,81 @@ unit_tests:
       rows:
         - {encounter_id: encounter-1, person_id: person-1, data_source: source-a, prccsr_car001: 1, prccsr_dig001: 1}
         - {encounter_id: encounter-1, person_id: person-1, data_source: source-b, prccsr_car001: 1, prccsr_dig001: 0}
+
+  - name: test_procedure_category_map_restores_icd_10_pcs_attributes
+    description: >
+      The category map retains the ICD-10-PCS attributes required by the
+      public procedure summary.
+    model: ccsr__procedure_category_map
+    given:
+      - input: ref('prccsr_v2023_1_cleaned_map')
+        format: sql
+        rows: |
+          select
+              '0016070' as icd_10_pcs
+            , 'Test procedure' as icd_10_pcs_description
+            , 'CAR001' as prccsr
+            , 'Test category' as prccsr_description
+            , 'Cardiovascular' as clinical_domain
+      - input: ref('terminology__icd10_pcs_cms_ontology')
+        format: sql
+        rows: |
+          select
+              '0016070' as icd10pcs_code
+            , 'Medical and Surgical' as section
+            , 'Bypass' as operation
+            , 'Open' as approach
+            , 'No Device' as device
+            , 'No Qualifier' as qualifier
+    expect:
+      rows:
+        - code: '0016070'
+          ccsr_category: CAR001
+          procedure_section: Medical and Surgical
+          operation: Bypass
+          approach: Open
+          device: No Device
+          qualifier: No Qualifier
+
+  - name: test_procedure_summary_is_source_scoped
+    description: >
+      Reused category and operation values calculate independent procedure
+      totals and approach rates in each source.
+    model: ccsr__procedure_summary
+    given:
+      - input: ref('ccsr__long_procedure_category')
+        format: sql
+        rows: |
+          select
+              'source-a' as data_source
+            , 'CAR001' as ccsr_category
+            , 'Test category' as ccsr_category_description
+            , 'Bypass' as operation
+            , 'Open' as approach
+          union all
+          select 'source-a', 'CAR001', 'Test category', 'Bypass', 'Percutaneous'
+          union all
+          select 'source-b', 'CAR001', 'Test category', 'Bypass', 'Open'
+    expect:
+      rows:
+        - data_source: source-a
+          ccsr_category: CAR001
+          operation: Bypass
+          approach: Open
+          n_occurrences_with_approach: 1
+          n_total_occurrences: 2
+          approach_rate: 50.0
+        - data_source: source-a
+          ccsr_category: CAR001
+          operation: Bypass
+          approach: Percutaneous
+          n_occurrences_with_approach: 1
+          n_total_occurrences: 2
+          approach_rate: 50.0
+        - data_source: source-b
+          ccsr_category: CAR001
+          operation: Bypass
+          approach: Open
+          n_occurrences_with_approach: 1
+          n_total_occurrences: 1
+          approach_rate: 100.0

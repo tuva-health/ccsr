@@ -29,6 +29,11 @@ select distinct
     ccsr__procedure_category_map.ccsr_category,
     ccsr__procedure_category_map.ccsr_category_description,
     ccsr__procedure_category_map.clinical_domain,
+    ccsr__procedure_category_map.procedure_section,
+    ccsr__procedure_category_map.operation,
+    ccsr__procedure_category_map.approach,
+    ccsr__procedure_category_map.device,
+    ccsr__procedure_category_map.qualifier,
     {{ var('prccsr_version') }} as prccsr_version,
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
 from procedure_records

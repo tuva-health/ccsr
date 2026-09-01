@@ -4,4 +4,4 @@ packages:
   # Production connectors provide Core. This integration project pins Core so
   # package-local parsing and regression tests have its macros and contracts.
   - git: "https://github.com/tuva-health/tuva-core.git"
-    revision: d7f1ed0227003cba85914aadf8c2164320e52c77
+    revision: d3f4171f78af07a1a4320a433d9a2b9497ec6682
