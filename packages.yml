@@ -1,4 +1,4 @@
 packages:
   # Used by ccsr models: pretty_time, get_column_values, group_by.
   - package: dbt-labs/dbt_utils
-    version: [">=1.2.0", "<2.0.0"]
+    version: [">=1.3.2", "<2.0.0"]

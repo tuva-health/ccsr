@@ -1,4 +1,4 @@
-[![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![dbt logo and version](https://img.shields.io/static/v1?logo=dbt&label=dbt-version&message=1.10.5%20to%201.x&color=orange)
+[![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![dbt logo and version](https://img.shields.io/static/v1?logo=dbt&label=dbt-version&message=1.10.5%20to%202.x&color=orange)
 
 # CCSR Grouper
 
@@ -17,6 +17,11 @@ The [Clinical Classications Software Refined (CCSR)](https://hcup-us.ahrq.gov/to
 * **DXCCSR - Output Option 1, Vertical Output File:** `ccsr__long_condition_category`. This table includes description columns provided by the CCSR seed file but not defined in the the SAS program.
 * **DXCCSR - Output Option 2, Horizontal Output File:** `ccsr__wide_condition_category`
 * **DXCCSR - Output Option 3, Optional File with Default Assignment for Principal or First-Listed Diagnosis:** `ccsr__singular_condition_category`
+* **Procedure volume summary:** `ccsr__procedure_summary` reports source-scoped, claim-linked procedure volumes and approach rates by CCSR category and root operation, preserving the retained behavior that procedures without a claim ID do not contribute to the counts.
+
+Tuva 1.0 intentionally retains the reviewed DXCCSR and PRCCSR v2023.1
+mappings. A later CCSR mapping release will be published as a separate data
+asset version so that package code and mapping changes remain explicit.
 
 ### Notes on Diagnosis Categories & Defaults
 
@@ -100,7 +105,8 @@ dbt loads the configured path without reading them.
 This package has been tested on: 
 - Snowflake
 
-This package supports dbt versions `>=1.10.5,<2.0.0`.
+This package supports dbt versions `>=1.10.5,<3.0.0`. dbt Core 2 and dbt
+Fusion remain separate executable compatibility targets.
 <br/><br/>
 
 ## 🙋🏻‍♀️ How is this package maintained and how do I contribute?
