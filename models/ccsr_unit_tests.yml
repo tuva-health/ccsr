@@ -165,6 +165,7 @@ unit_tests:
             , 'CAR001' as prccsr
             , 'Test category' as prccsr_description
             , 'Cardiovascular' as clinical_domain
+          from (select 1 as _tuva_fixture_row) as _tuva_fixture_row
       - input: ref('terminology__icd10_pcs_cms_ontology')
         format: sql
         rows: |
@@ -175,6 +176,7 @@ unit_tests:
             , 'Open' as approach
             , 'No Device' as device
             , 'No Qualifier' as qualifier
+          from (select 1 as _tuva_fixture_row) as _tuva_fixture_row
     expect:
       rows:
         - code: '0016070'
