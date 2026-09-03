@@ -210,6 +210,12 @@ unit_tests:
           select 'source-a', null, 'CAR001', 'Test category', 'Bypass', 'Open'
           union all
           select 'source-b', 'claim-3', 'CAR001', 'Test category', 'Bypass', 'Open'
+      - input: ref('ccsr__procedure_category_map')
+        format: sql
+        rows: |
+          select
+              'CAR001' as ccsr_category
+            , 'Test category' as ccsr_category_description
     expect:
       rows:
         - data_source: source-a
@@ -232,4 +238,41 @@ unit_tests:
           approach: Open
           n_occurrences_with_approach: 1
           n_total_occurrences: 1
+          approach_rate: 100.0
+
+  - name: test_procedure_summary_combines_description_variants
+    description: >
+      Description variants for one category do not split its source-scoped
+      procedure counts or rates. The category map supplies one stable label.
+    model: ccsr__procedure_summary
+    given:
+      - input: ref('ccsr__long_procedure_category')
+        format: sql
+        rows: |
+          select
+              'source-a' as data_source
+            , 'claim-1' as claim_id
+            , 'CAR001' as ccsr_category
+            , 'Alpha category' as ccsr_category_description
+            , 'Bypass' as operation
+            , 'Open' as approach
+          union all
+          select 'source-a', 'claim-2', 'CAR001', 'Zulu category', 'Bypass', 'Open'
+      - input: ref('ccsr__procedure_category_map')
+        format: sql
+        rows: |
+          select
+              'CAR001' as ccsr_category
+            , 'Alpha category' as ccsr_category_description
+          union all
+          select 'CAR001', 'Zulu category'
+    expect:
+      rows:
+        - data_source: source-a
+          ccsr_category: CAR001
+          ccsr_category_description: Alpha category
+          operation: Bypass
+          approach: Open
+          n_occurrences_with_approach: 2
+          n_total_occurrences: 2
           approach_rate: 100.0

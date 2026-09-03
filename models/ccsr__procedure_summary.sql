@@ -3,7 +3,6 @@ with procedure_base as (
     select
         data_source,
         ccsr_category,
-        ccsr_category_description,
         operation,
         approach,
         claim_id,
@@ -18,31 +17,39 @@ with procedure_base as (
     select
         data_source,
         ccsr_category,
-        ccsr_category_description,
         operation,
         approach,
         count(claim_id) as n_occurrences_with_approach,
-        n_total_occurrences
+        max(n_total_occurrences) as n_total_occurrences
     from procedure_base
     group by
         data_source,
         ccsr_category,
-        ccsr_category_description,
         operation,
-        approach,
-        n_total_occurrences
+        approach
+
+), category_descriptions as (
+
+    -- Description variants must not split a category's procedure counts.
+    select
+        ccsr_category,
+        min(ccsr_category_description) as ccsr_category_description
+    from {{ ref('ccsr__procedure_category_map') }}
+    group by ccsr_category
 
 )
 
 select
-    data_source,
-    ccsr_category,
-    ccsr_category_description,
-    operation,
-    approach,
-    n_occurrences_with_approach,
-    n_total_occurrences,
-    100.0 * n_occurrences_with_approach
-        / nullif(n_total_occurrences, 0) as approach_rate,
+    procedures_aggregated.data_source,
+    procedures_aggregated.ccsr_category,
+    category_descriptions.ccsr_category_description,
+    procedures_aggregated.operation,
+    procedures_aggregated.approach,
+    procedures_aggregated.n_occurrences_with_approach,
+    procedures_aggregated.n_total_occurrences,
+    100.0 * procedures_aggregated.n_occurrences_with_approach
+        / nullif(procedures_aggregated.n_total_occurrences, 0) as approach_rate,
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
 from procedures_aggregated
+left join category_descriptions
+    on procedures_aggregated.ccsr_category = category_descriptions.ccsr_category
