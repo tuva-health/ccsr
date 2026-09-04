@@ -126,7 +126,7 @@ snapshot; the asset version is not inferred from the package version.
 
 ## Compatibility
 
-The package targets the Tuva-supported adapters:
+The end-to-end Tuva 1.0 support matrix covers:
 
 - Snowflake
 - BigQuery
@@ -134,14 +134,15 @@ The package targets the Tuva-supported adapters:
 - Microsoft Fabric
 - Redshift
 - DuckDB
-- Microsoft SQL Server
-- Amazon Athena
 
 Release preparation includes full package or integrated execution on
 Snowflake, Microsoft Fabric, and DuckDB; targeted execution on Redshift; and
-adapter portability review for BigQuery, Databricks, Microsoft SQL Server, and
-Amazon Athena. Because adapter and connector environments differ, validate the
-package with your connector and warehouse before promoting it to production.
+adapter portability review for BigQuery and Databricks. CCSR package SQL has
+also received package-level portability review for Microsoft SQL Server and
+Amazon Athena, but those adapters are outside the current end-to-end Tuva Core
+support matrix and are not claimed as supported Tuva stack targets here.
+Because adapter and connector environments differ, validate the package with
+your connector and warehouse before promoting it to production.
 
 ## Documentation and support
 
