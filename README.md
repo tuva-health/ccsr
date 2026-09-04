@@ -1,121 +1,161 @@
-[![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![dbt logo and version](https://img.shields.io/static/v1?logo=dbt&label=dbt-version&message=1.10.5%20to%202.x&color=orange)
+[![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+![dbt version](https://img.shields.io/badge/dbt-1.10.5%20to%202.x-orange)
 
 # CCSR Grouper
 
-## 🔗  Quick Links
-- [Docs](https://thetuvaproject.com/data-marts/ccsr): Learn about the Tuva Project data model
-- [Knowledge Base](https://thetuvaproject.com/docs/intro): Learn about claims data fundamentals and how to do claims data analytics
-<br/><br/>
+The CCSR Grouper is a standalone dbt package that classifies normalized
+ICD-10-CM diagnoses and ICD-10-PCS procedures using the Agency for Healthcare
+Research and Quality (AHRQ) [Clinical Classifications Software Refined
+(CCSR)](https://hcup-us.ahrq.gov/toolssoftware/ccsr/ccs_refined.jsp). It runs on
+top of the Tuva data model and turns granular codes into clinically meaningful
+categories for cohorting, utilization analysis, and procedure-pattern
+reporting.
 
-## 🧰  What does this package do?
+This package retains the reviewed DXCCSR and PRCCSR v2023.1 mappings. It is an
+open-source Tuva implementation of the published AHRQ mappings; it is not an
+official AHRQ product.
 
+## Outputs
 
-The [Clinical Classications Software Refined (CCSR)](https://hcup-us.ahrq.gov/toolssoftware/ccsr/ccs_refined.jsp) SAS programs produce mappings from granular ICD-10 codes to clinically useful categories, and this dbt project creates sql tables mapped according to the same logic. In place of the vertical/horizontal terminology from the CCSR, I've used long/wide in the modern data parlance. Here's how the models relate to the SAS outputs:
+The primary package outputs are:
 
-* **PRCCSR - Output Option 1, Vertical Output File:** `ccsr__long_procedure_category`. This table includes description columns provided by the CCSR seed file but not defined in the the SAS program.
-* **PRCCSR - Output Option 2, Horizontal Output File:** `ccsr__wide_procedure_category`
-* **DXCCSR - Output Option 1, Vertical Output File:** `ccsr__long_condition_category`. This table includes description columns provided by the CCSR seed file but not defined in the the SAS program.
-* **DXCCSR - Output Option 2, Horizontal Output File:** `ccsr__wide_condition_category`
-* **DXCCSR - Output Option 3, Optional File with Default Assignment for Principal or First-Listed Diagnosis:** `ccsr__singular_condition_category`
-* **Procedure volume summary:** `ccsr__procedure_summary` reports source-scoped, claim-linked procedure volumes and approach rates by CCSR category and root operation, preserving the retained behavior that procedures without a claim ID do not contribute to the counts.
+| Model | Grain and use |
+| --- | --- |
+| `ccsr__long_condition_category` | One row per source condition and mapped diagnosis category. A diagnosis may map to as many as six categories. |
+| `ccsr__singular_condition_category` | The inpatient or outpatient default category for each first-listed diagnosis. |
+| `ccsr__wide_condition_category` | One row per source-scoped encounter/claim/person record, with one column per diagnosis category and AHRQ-compatible values from 0 through 3. |
+| `ccsr__long_procedure_category` | One row per source procedure and mapped procedure category, including ICD-10-PCS ontology attributes. |
+| `ccsr__wide_procedure_category` | One row per source-scoped encounter with binary procedure-category columns. |
+| `ccsr__procedure_summary` | Source-scoped, claim-linked procedure counts and approach rates by category and root operation. |
 
-Tuva 1.0 intentionally retains the reviewed DXCCSR and PRCCSR v2023.1
-mappings. A later CCSR mapping release will be published as a separate data
-asset version so that package code and mapping changes remain explicit.
+The package also materializes `ccsr__dx_vertical_pivot` and
+`ccsr__procedure_category_map` as mapping helpers. Column-level definitions,
+grains, and tests live in [`models/_model.yml`](models/_model.yml).
 
-### Notes on Diagnosis Categories & Defaults
+## Prerequisites
 
-Each ICD-10-CM code is mapped to as many as 6 CCSR categories, though 88.3% of all codes are mapped to only one. This means that given record with `m` ICD-10 each with `n` categories, each record  will have m*n rows in the `ccsr__long_condition_category`.
+- dbt `>=1.10.5,<3.0.0`.
+- A Tuva connector or another root dbt project that installs a compatible Tuva
+  Core version and populates the Tuva Input Layer.
+- Built Tuva Core `core__condition` and `core__procedure` models. Procedure
+  enrichment also uses Core's `terminology__icd10_pcs_cms_ontology` model.
+- Normalized ICD-10-CM and ICD-10-PCS codes in the corresponding Core models.
 
-The CCSR's includes a "default category" for each ICD-10-CM code that allows us to reduce each ICD-10-CM code to a single category. The CCSR differentiates between default categories for inpatient and outpatient records, and the SAS script exposes the record type as a configuration option. We expose these as boolean fields in `ccsr__long_condition_category` - `is_ip_default_category` and `is_op_default_category` for inpatient and outpatient, respectively. By default, the dag will run as inpatient data - this can be configured via the `record_type` variable.
+The production connector/root project owns the Tuva Core dependency. This
+package deliberately does not pin or install Core itself, which prevents a
+connector and a standalone package from introducing competing Core revisions.
+`dbt_utils`, which this package calls directly, is declared in
+[`packages.yml`](packages.yml). If you maintain a custom root project without a
+Tuva connector, install a compatible Tuva Core revision once in that root
+project.
 
-ICD-10-PCS codes map to only one category each, and so have no rank or default.
+## Installation
 
-### Notes on Wide Tables
+Once the package is listed on dbt Hub, add it to the root project's
+`packages.yml`:
 
-We opted against running test against each of the 500+ columns in the wide tables, and instead validated a sample of output created by generating wide tables from Medicare SAF data. The following validation script was used to ensure no out of band values - 0,1,2,3 for the wide condition table, and 0 or 1 for wide procedures.
-
+```yaml
+packages:
+  - package: tuva-health/ccsr
+    version: 0.1.0
 ```
-import pandas as pd
 
+Then install dependencies:
 
-cond = pd.read_csv('wide_condition.csv')
-
-# remove columns that aren't encoded
-column_mask = ~cond.columns.isin(['CLAIM_ID', 'PATIENT_ID','DXCCSR_VERSION'])
-
-print(cond.loc[: , column_mask].max().unique())
-print(cond.loc[: , column_mask].min().unique())
-
-proc = pd.read_csv('wide_proc.csv')
-
-# remove columns that aren't encoded
-column_mask = ~proc.columns.isin(['ENCOUNTER_ID', 'PATIENT_ID','PRCCSR_VERSION'])
-
-print(proc.loc[: , column_mask].max().unique())
-print(proc.loc[: , column_mask].min().unique())
+```shell
+dbt deps
 ```
 
-### A Note On CSV Seed Files
+For a Git-based installation, use the immutable release tag instead:
 
-We encounted issues with the use of mixed quote characters in the CSV files provided with the CCSR SAS programs. We used the following python script to clean the files:
-
+```yaml
+packages:
+  - git: "https://github.com/tuva-health/ccsr.git"
+    revision: v0.1.0
 ```
-import pandas as pd
 
-FILES = ["DXCCSR_v2023-1/DXCCSR_v2023-1.csv", "PRCCSR_v2023-1/PRCCSR_v2023-1.csv"]
+Use either the dbt Hub entry or the Git dependency, not both. Keep Core owned
+by the connector or root project in either case.
 
+## Configuration
 
-def ccsr_csv_cleaner(df, output_name):
+Defaults are defined in [`dbt_project.yml`](dbt_project.yml). Override package
+behavior from the root project with package-scoped variables:
 
-    clean_columns = []
+```yaml
+vars:
+  ccsr:
+    record_type: "ip"
+    wide_condition_enabled: true
+    wide_procedure_enabled: true
+```
 
-    for col in df.columns:
-        col_clean = col.strip("'").lower().replace(" ", "_").replace("-", "_")
-        clean_columns.append(col_clean)
-    df.columns = clean_columns
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `record_type` | `ip` | Selects the inpatient (`ip`) or outpatient (`op`) default diagnosis category used by `ccsr__singular_condition_category`. |
+| `wide_condition_enabled` | `true` | Builds the wide diagnosis-category output. Set to `false` when only long or singular output is needed. |
+| `wide_procedure_enabled` | `true` | Builds the wide procedure-category output. Set to `false` when only long or summary output is needed. |
+| `ccsr_data_asset_version` | `1.0.0` | Selects the published mapping snapshot. Change only when coordinating against another published CCSR asset version. |
 
-    quoted_cols = df.columns[[not i for i in df.columns.str.endswith("_description")]]
-    df[quoted_cols] = df[quoted_cols].apply(lambda x: x.str.strip("'"))
-    df.to_csv(output_name)
-    print(f"Saved file: {output_name}")
+The `dxccsr_version` and `prccsr_version` defaults label the retained AHRQ
+mapping version. They are coordinated with the package's published assets and
+normally should not be overridden independently.
 
+After the connector and Core models are ready, build the package with its seeds
+and tests:
 
-for file in FILES:
-    output_name = f"{file[:6].lower()}_v2023_1_cleaned_map.csv"
-    df = pd.read_csv(file)
-    ccsr_csv_cleaner(df, output_name)
+```shell
+dbt build --select package:ccsr
 ```
 
 ## Data assets
 
-Seed contents are stored under
-`s3://tuva-public-resources/data-marts/ccsr/<asset-version>/` and mirrored to
-GCS and Azure. The checked-in CSV files contain only the headers required by
-dbt.
+The package owns three mapping assets:
 
-`ccsr_data_asset_version` selects the folder and defaults to `1.0.0`. Package
-code and data assets are versioned independently and are coordinated manually.
-Cloud manifests record the asset inventory, provenance, and release status;
-dbt loads the configured path without reading them.
-<br/><br/>
+- DXCCSR v2023.1 code-to-category mappings
+- DXCCSR v2023.1 body-system mappings
+- PRCCSR v2023.1 code-to-category mappings
 
-## 🔌  Supported Databases and dbt Versions
+The checked-in CSVs are header-only dbt loader contracts. During `dbt seed`,
+Tuva Core's shared loader retrieves the contents from the public CCSR asset
+path in S3, with equivalent mirrors in GCS and Azure.
 
-This package has been tested on: 
+Package code and data assets have independent versions. Package release
+`0.1.0` intentionally uses the existing `ccsr_data_asset_version: "1.0.0"`
+snapshot; the asset version is not inferred from the package version.
+
+## Compatibility
+
+The package targets the Tuva-supported adapters:
+
 - Snowflake
+- BigQuery
+- Databricks
+- Microsoft Fabric
+- Redshift
+- DuckDB
+- Microsoft SQL Server
+- Amazon Athena
 
-This package supports dbt versions `>=1.10.5,<3.0.0`. dbt Core 2 and dbt
-Fusion remain separate executable compatibility targets.
-<br/><br/>
+Release preparation includes full package or integrated execution on
+Snowflake, Microsoft Fabric, and DuckDB; targeted execution on Redshift; and
+adapter portability review for BigQuery, Databricks, Microsoft SQL Server, and
+Amazon Athena. Because adapter and connector environments differ, validate the
+package with your connector and warehouse before promoting it to production.
 
-## 🙋🏻‍♀️ How is this package maintained and how do I contribute?
+## Documentation and support
 
-The Tuva Project team maintaining this package **only** maintains the latest version of the package. We highly recommend you stay consistent with the latest version.
+- [Tuva CCSR documentation](https://thetuvaproject.com/data-marts/ccsr)
+- [Tuva getting started guide](https://thetuvaproject.com/getting-started)
+- [Open an issue](https://github.com/tuva-health/ccsr/issues)
+- [Tuva Community Slack](https://join.slack.com/t/thetuvaproject/shared_invite/zt-16iz61187-G522Mc2WGA2mHF57e0il0Q)
 
-Have an opinion on the mappings? Notice any bugs when installing and running the package? If so, we highly encourage and welcome feedback! While we work on a formal process in Github, we can be easily reached in our Slack community.
-<br/><br/>
+## Contributing
 
-## 🤝 Join our community!
+Issues and pull requests are welcome. Please describe the affected CCSR
+mapping or output contract, add the smallest dbt-native test that demonstrates
+behavioral changes, and report the dbt adapter and version used for validation.
 
-Join our growing community of healthcare data practitioners in [Slack](https://join.slack.com/t/thetuvaproject/shared_invite/zt-16iz61187-G522Mc2WGA2mHF57e0il0Q)!
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
