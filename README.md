@@ -51,31 +51,32 @@ project.
 
 ## Installation
 
-Once the package is listed on dbt Hub, add it to the root project's
-`packages.yml`:
+Declare Tuva Core and this package once in the root project's
+`packages.yml`. Use the immutable 1.0 release tags:
 
 ```yaml
 packages:
-  - package: tuva-health/ccsr
-    version: 0.1.0
+  - git: "https://github.com/tuva-health/tuva-core.git"
+    revision: "v1.0.0"
+  - git: "https://github.com/tuva-health/ccsr.git"
+    revision: "v1.0.0"
 ```
 
-Then install dependencies:
+After these releases are available on dbt Hub, the equivalent installation is:
+
+```yaml
+packages:
+  - package: tuva-health/the_tuva_project
+    version: 1.0.0
+  - package: tuva-health/ccsr
+    version: 1.0.0
+```
+
+Then install dependencies from the root project:
 
 ```shell
 dbt deps
 ```
-
-For a Git-based installation, use the immutable release tag instead:
-
-```yaml
-packages:
-  - git: "https://github.com/tuva-health/ccsr.git"
-    revision: v0.1.0
-```
-
-Use either the dbt Hub entry or the Git dependency, not both. Keep Core owned
-by the connector or root project in either case.
 
 ## Configuration
 
@@ -121,7 +122,7 @@ Tuva Core's shared loader retrieves the contents from the public CCSR asset
 path in S3, with equivalent mirrors in GCS and Azure.
 
 Package code and data assets have independent versions. Package release
-`0.1.0` intentionally uses the existing `ccsr_data_asset_version: "1.0.0"`
+`1.0.0` intentionally uses the existing `ccsr_data_asset_version: "1.0.0"`
 snapshot; the asset version is not inferred from the package version.
 
 ## Compatibility
