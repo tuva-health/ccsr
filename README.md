@@ -80,6 +80,12 @@ dbt deps
 
 ## Configuration
 
+CCSR models use the `ccsr` schema, or `<tuva_schema_prefix>_ccsr` when a
+prefix is configured, under Tuva's schema naming. The root project's schema
+naming macro and explicit model overrides still apply. Seed locations are
+configured independently. Rebuild CCSR after upgrading to this routing; dbt
+does not remove tables left in the previous schema.
+
 Defaults are defined in [`dbt_project.yml`](dbt_project.yml). Override package
 behavior from the root project with package-scoped variables:
 

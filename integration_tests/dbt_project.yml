@@ -4,6 +4,10 @@ config-version: 2
 
 profile: default
 
+dispatch:
+  - macro_namespace: dbt
+    search_order: [integration_tests, the_tuva_project, dbt]
+
 vars:
   claims_enabled: false
   clinical_enabled: false
