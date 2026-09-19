@@ -6,6 +6,9 @@ models:
 
   - name: ccsr__dx_vertical_pivot
     config:
+      schema: &ccsr_schema |
+        {%- if var('tuva_schema_prefix', none) is not none -%}{{ var('tuva_schema_prefix') }}_ccsr
+        {%- else -%}ccsr{%- endif -%}
       tags: ccsr
       materialized: table
     description: |
@@ -49,6 +52,7 @@ models:
 
   - name: ccsr__procedure_category_map
     config:
+      schema: *ccsr_schema
       tags: ccsr
       materialized: table
     description: This is an intermediate model that renames some PRCCSR columns to align with other TUVA
@@ -84,6 +88,7 @@ models:
 
   - name: ccsr__long_condition_category
     config:
+      schema: *ccsr_schema
       tags: ccsr
       materialized: table
     description: This model contains a mapping of individual condition ICD-10-CM diagnosis codes to the
@@ -144,6 +149,7 @@ models:
 
   - name: ccsr__wide_condition_category
     config:
+      schema: *ccsr_schema
       tags: ccsr
       materialized: table
       enabled: "{{var('wide_condition_enabled', True)}}"
@@ -184,6 +190,7 @@ models:
 
   - name: ccsr__singular_condition_category
     config:
+      schema: *ccsr_schema
       tags: ccsr
       materialized: table
     description: This model contains only the CCSR's default category assignment for the ICD-10 code,
@@ -228,6 +235,7 @@ models:
       CCSR's clinically meaningful procedure categories. Each row represents a mapping of an ICD-10 code
       to a CCSR category. The model is equivalent to the CCSR's Output Option 1 - Vertical File Output.
     config:
+      schema: *ccsr_schema
       tags: ccsr
       materialized: table
     data_tests:
@@ -289,6 +297,7 @@ models:
 
   - name: ccsr__procedure_summary
     config:
+      schema: *ccsr_schema
       tags: ccsr
       materialized: table
     description: >
@@ -330,6 +339,7 @@ models:
 
   - name: ccsr__wide_procedure_category
     config:
+      schema: *ccsr_schema
       tags: ccsr
       materialized: table
       enabled: "{{var('wide_procedure_enabled', True)}}"
