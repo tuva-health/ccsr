@@ -11,6 +11,6 @@ select
     ontology.device,
     ontology.qualifier,
     '{{ dbt_utils.pretty_time(format="%Y-%m-%d %H:%M:%S") }}' as _model_run_time
-from {{ ref('prccsr_v2023_1_cleaned_map') }} as ccsr_map
+from {{ ref('prccsr_v2027_1_cleaned_map') }} as ccsr_map
 left join {{ ref('terminology__icd10_pcs_cms_ontology') }} as ontology
     on ccsr_map.icd_10_pcs = ontology.icd10pcs_code
