@@ -1,9 +1,9 @@
 version: 2
 
 seeds:
-  - name: dxccsr_v2023_1_cleaned_map
-    description: A table containing the CSV mapping file included with the DXCCSR SAS program.
-      The original CSV was not natively seedable, and the file was transformed with the coded included in the README.
+  - name: dxccsr_v2027_1_cleaned_map
+    description: AHRQ DXCCSR v2027.1 diagnosis mappings, normalized by the
+      versioned Tuva data-assets preparation recipe.
       For each ICD-10-CM code, the table contains up to six CCSR category codes and a default CCSR category code.
     config:
       column_types:
@@ -27,9 +27,13 @@ seeds:
         ccsr_category_5_description: *description_type
         ccsr_category_6: *string_type
         ccsr_category_6_description: *description_type
-  - name: prccsr_v2023_1_cleaned_map
-    description: A table containing the CSV mapping file included with the PRCCSR SAS program.
-      The original CSV was not natively seedable, and the file was transformed with the coded included in the README.
+    columns:
+      - name: icd_10_cm_code
+        data_tests: [not_null, unique]
+  - name: prccsr_v2027_1_cleaned_map
+    description: AHRQ PRCCSR v2027.1 procedure mappings. AHRQ's coarse APPROACH
+      classification is omitted; public procedure approach remains the CMS
+      ICD-10-PCS ontology attribute.
     config:
       column_types:
         icd_10_pcs: *string_type
@@ -37,12 +41,20 @@ seeds:
         prccsr: *string_type
         prccsr_description: *description_type
         clinical_domain: *string_type
-  - name: dxccsr_v2023_1_body_systems
+    columns:
+      - name: icd_10_pcs
+        data_tests: [not_null, unique]
+      - name: prccsr
+        data_tests: [not_null]
+  - name: dxccsr_v2027_1_body_systems
     description: |
       A table containing descriptions of the top level categories used in the CCSR condition mapper.
-      This was manually exctracted from the User Guide PDF included with the DXCCSR SAS program.
+      Derived from the Naming_Conventions sheet in the AHRQ DXCCSR v2027.1 reference workbook.
     config:
       column_types:
         body_system: *string_type
         ccsr_parent_category: *string_type
         parent_category_description: *description_type
+    columns:
+      - name: ccsr_parent_category
+        data_tests: [not_null, unique]
