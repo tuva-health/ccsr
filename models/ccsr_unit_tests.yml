@@ -34,7 +34,7 @@ unit_tests:
             , 1 as ccsr_category_rank
             , 1 as is_ip_default_category
             , 1 as is_op_default_category
-      - input: ref('dxccsr_v2023_1_body_systems')
+      - input: ref('dxccsr_v2027_1_body_systems')
         format: sql
         rows: |
           select
@@ -156,7 +156,7 @@ unit_tests:
       public procedure summary.
     model: ccsr__procedure_category_map
     given:
-      - input: ref('prccsr_v2023_1_cleaned_map')
+      - input: ref('prccsr_v2027_1_cleaned_map')
         format: sql
         rows: |
           select

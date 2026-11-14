@@ -30,7 +30,7 @@ with boolean_ranks as (
         person_id,
         data_source,
         ccsr_category,
-        -- assigns one of four values for each DXCCSR data element as per pg 25 of DXCCSR User guide v2023.1
+        -- Assign the AHRQ horizontal-output diagnosis rank indicator (0-3).
         case 
             when is_nth = 0 then 0
             when is_only_first = 1 and ccsr_category not like 'XXX%' then 1
