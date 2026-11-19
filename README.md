@@ -67,14 +67,14 @@ project.
 ## Installation
 
 Declare Tuva Core and this package once in the root project's
-`packages.yml`. Use the immutable release tags for the 3.0 release:
+`packages.yml`. Use the immutable release tags for the 2.1 release:
 
 ```yaml
 packages:
   - git: "https://github.com/tuva-health/tuva-core.git"
     revision: "v1.0.0"
   - git: "https://github.com/tuva-health/ccsr.git"
-    revision: "v3.0.0"
+    revision: "v2.1.0"
 ```
 
 After these releases are available on dbt Hub, the equivalent installation is:
@@ -84,7 +84,7 @@ packages:
   - package: tuva-health/the_tuva_project
     version: 1.0.0
   - package: tuva-health/ccsr
-    version: 3.0.0
+    version: 2.1.0
 ```
 
 Then install dependencies from the root project:
@@ -157,8 +157,8 @@ procedure codes therefore depends on the Core data assets installed.
 
 ## Upgrade from 2.0
 
-Version 3.0 removes `ccsr__singular_condition_category` and the `record_type`
-variable. Removing a public model is a breaking change. The other five output
+Version 2.1 removes `ccsr__singular_condition_category` and the `record_type`
+variable. Consumers of the removed model must migrate. The other five output
 models retain their SQL, schemas, and classification results. AHRQ mappings
 remain at v2027.1 and the mapping asset snapshot remains at `2.0.0`.
 
@@ -170,7 +170,7 @@ remain at v2027.1 and the mapping asset snapshot remains at `2.0.0`.
 2. Remove `record_type` from the root project's variables. It no longer has an
    effect. Do not replace it with a default-category or rank-1 filter unless
    your analysis independently establishes the care setting and diagnosis role.
-3. Update the package revision to `v3.0.0`, run `dbt deps`, then run
+3. Update the package revision to `v2.1.0`, run `dbt deps`, then run
    `dbt build --select package:ccsr` against the existing Core models.
 4. After migrating dependent models and reports, explicitly drop the old
    singular table from its deployed schema. dbt does not delete relations when
@@ -178,7 +178,7 @@ remain at v2027.1 and the mapping asset snapshot remains at `2.0.0`.
 
 ## Upgrade from 1.0
 
-Follow the 2.0-to-3.0 migration above as well as the mapping changes below.
+Follow the 2.0-to-2.1 migration above as well as the mapping changes below.
 The mapping update introduced in 2.0 changes dynamically generated wide schemas
 and classification results. Review dependent extracts, BI models, and category
 lists before rebuilding.
@@ -195,7 +195,7 @@ The procedure wide output adds `prccsr_esa012`. Diagnosis inpatient defaults
 change for 55 existing codes and outpatient defaults for 292. Body-system
 names and category-count descriptions are regenerated from the current AHRQ
 reference workbook. The long outputs retain their schemas and source-scoped
-grains; the singular output is removed in 3.0.
+grains; the singular output is removed in 2.1.
 
 1. Upgrade the CCSR package and remove root-level `dxccsr_version`,
    `prccsr_version`, or `ccsr_data_asset_version` overrides that retain the
