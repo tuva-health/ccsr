@@ -5,7 +5,6 @@
     'ccsr__dx_vertical_pivot',
     'ccsr__procedure_category_map',
     'ccsr__long_condition_category',
-    'ccsr__singular_condition_category',
     'ccsr__wide_condition_category',
     'ccsr__long_procedure_category',
     'ccsr__wide_procedure_category',
