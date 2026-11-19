@@ -1,5 +1,5 @@
 name: 'ccsr'
-version: '2.0.0'
+version: '2.1.0'
 config-version: 2
 require-dbt-version: [">=1.10.5", "<3.0.0"]
 
@@ -34,9 +34,6 @@ vars:
     # These vars enable the wide tables - disabling will exclude wide tables from dbt runs
     wide_condition_enabled: True
     wide_procedure_enabled: True
-
-    # Set to "ip" for inpatient data or "op" for outpatient data (More info in the README)
-    record_type: "ip"
 
     # CCSR Version numbers from HCUP
     dxccsr_version: "'2027.1'"

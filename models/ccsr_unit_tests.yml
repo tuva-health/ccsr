@@ -1,6 +1,82 @@
 version: 2
 
 unit_tests:
+  - name: test_long_condition_category_retains_all_mappings_without_setting
+    description: >-
+      AHRQ v2027.1 maps I110 to CIR008 and CIR019, and Z2989 to FAC005 even
+      though Z2989 is not an acceptable inpatient principal diagnosis. Retain
+      these mappings at every source rank, including null, and keep unmapped
+      ICD-10-CM codes visible without assigning a category.
+    model: ccsr__long_condition_category
+    given:
+      - input: ref('core__condition')
+        format: sql
+        rows: |
+          select
+              'rank-1' as encounter_id
+            , 'claim-1' as claim_id
+            , 'person-1' as person_id
+            , 'I110' as normalized_code
+            , 1 as condition_rank
+            , 'icd-10-cm' as code_system
+            , 'source-a' as data_source
+          union all
+          select 'rank-2', 'claim-2', 'person-1', 'I110', 2, 'icd-10-cm', 'source-a'
+          union all
+          select 'unranked', null, 'person-1', 'I110', null, 'icd-10-cm', 'source-a'
+          union all
+          select 'op-default-only', 'claim-3', 'person-1', 'Z2989', 1, 'icd-10-cm', 'source-a'
+          union all
+          select 'unmapped', null, 'person-1', 'UNMAPPED', null, 'icd-10-cm', 'source-a'
+          union all
+          select 'other-code-system', null, 'person-1', 'I110', 1, 'snomed-ct', 'source-a'
+      - input: ref('ccsr__dx_vertical_pivot')
+        rows:
+          - code: I110
+            code_description: Hypertensive heart disease with heart failure
+            ccsr_parent_category: CIR
+            ccsr_category: CIR008
+            ccsr_category_description: Hypertension with complications and secondary hypertension
+            ccsr_category_rank: 1
+            is_ip_default_category: false
+            is_op_default_category: false
+          - code: I110
+            code_description: Hypertensive heart disease with heart failure
+            ccsr_parent_category: CIR
+            ccsr_category: CIR019
+            ccsr_category_description: Heart failure
+            ccsr_category_rank: 2
+            is_ip_default_category: true
+            is_op_default_category: true
+          - code: Z2989
+            code_description: Encounter for other specified prophylactic measures
+            ccsr_parent_category: FAC
+            ccsr_category: FAC005
+            ccsr_category_description: Encounter for prophylactic measures (excludes immunization)
+            ccsr_category_rank: 1
+            is_ip_default_category: false
+            is_op_default_category: true
+      - input: ref('dxccsr_v2027_1_body_systems')
+        format: sql
+        rows: |
+          select
+              'CIR' as ccsr_parent_category
+            , 'Diseases of the circulatory system' as body_system
+            , 'Diseases of the circulatory system' as parent_category_description
+          union all
+          select 'FAC', 'Factors influencing health status and contact with health services',
+              'Factors influencing health status and contact with health services'
+    expect:
+      rows:
+        - {encounter_id: rank-1, code: I110, diagnosis_rank: 1, ccsr_category: CIR008, is_ip_default_category: false, is_op_default_category: false}
+        - {encounter_id: rank-1, code: I110, diagnosis_rank: 1, ccsr_category: CIR019, is_ip_default_category: true, is_op_default_category: true}
+        - {encounter_id: rank-2, code: I110, diagnosis_rank: 2, ccsr_category: CIR008, is_ip_default_category: false, is_op_default_category: false}
+        - {encounter_id: rank-2, code: I110, diagnosis_rank: 2, ccsr_category: CIR019, is_ip_default_category: true, is_op_default_category: true}
+        - {encounter_id: unranked, code: I110, diagnosis_rank: null, ccsr_category: CIR008, is_ip_default_category: false, is_op_default_category: false}
+        - {encounter_id: unranked, code: I110, diagnosis_rank: null, ccsr_category: CIR019, is_ip_default_category: true, is_op_default_category: true}
+        - {encounter_id: op-default-only, code: Z2989, diagnosis_rank: 1, ccsr_category: FAC005, is_ip_default_category: false, is_op_default_category: true}
+        - {encounter_id: unmapped, code: UNMAPPED, diagnosis_rank: null, ccsr_category: null, is_ip_default_category: null, is_op_default_category: null}
+
   - name: test_long_condition_category_preserves_data_source
     description: >
       Reused condition identifiers in different sources remain independently

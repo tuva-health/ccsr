@@ -25,8 +25,7 @@ The primary package outputs are:
 | Model | Grain and use |
 | --- | --- |
 | `ccsr__long_condition_category` | One row per source condition and mapped diagnosis category. A diagnosis may map to as many as six categories. |
-| `ccsr__singular_condition_category` | The inpatient or outpatient default category for each first-listed diagnosis. |
-| `ccsr__wide_condition_category` | One row per source-scoped encounter/claim/person record, with one column per diagnosis category and AHRQ-compatible values from 0 through 3. |
+| `ccsr__wide_condition_category` | One row per source-scoped encounter/claim/person record, with one column per diagnosis category and values from 0 through 3 based on Core diagnosis ranks. |
 | `ccsr__long_procedure_category` | One row per source procedure and mapped procedure category, including ICD-10-PCS ontology attributes. |
 | `ccsr__wide_procedure_category` | One row per source-scoped encounter with binary procedure-category columns. |
 | `ccsr__procedure_summary` | Source-scoped, claim-linked procedure counts and approach rates by category and root operation. |
@@ -34,6 +33,19 @@ The primary package outputs are:
 The package also materializes `ccsr__dx_vertical_pivot` and
 `ccsr__procedure_category_map` as mapping helpers. Column-level definitions,
 grains, and tests live in [`models/_model.yml`](models/_model.yml).
+
+Diagnosis mapping retains every category assigned by AHRQ, regardless of care
+setting or diagnosis rank. Codes absent from the mapping remain in the long
+output with null category fields. The package does not produce AHRQ's optional
+single default category for a principal or first-listed diagnosis. That output
+requires reliable diagnosis role and inpatient/outpatient context. A source
+rank of 1 alone does not establish the principal diagnosis for an encounter.
+
+The `is_ip_default_category` and `is_op_default_category` columns retain AHRQ's
+default designations as mapping metadata. They do not identify where a diagnosis
+occurred and do not restrict diagnosis or procedure mappings to either setting.
+The wide diagnosis output continues to use Core's source diagnosis ranks; use
+the long output when ranks are missing or when all mapped conditions are needed.
 
 ## Prerequisites
 
@@ -55,14 +67,14 @@ project.
 ## Installation
 
 Declare Tuva Core and this package once in the root project's
-`packages.yml`. For the 2.0 release, use the immutable release tags (once published):
+`packages.yml`. Use the immutable release tags for the 2.1 release:
 
 ```yaml
 packages:
   - git: "https://github.com/tuva-health/tuva-core.git"
     revision: "v1.0.0"
   - git: "https://github.com/tuva-health/ccsr.git"
-    revision: "v2.0.0"
+    revision: "v2.1.0"
 ```
 
 After these releases are available on dbt Hub, the equivalent installation is:
@@ -72,7 +84,7 @@ packages:
   - package: tuva-health/the_tuva_project
     version: 1.0.0
   - package: tuva-health/ccsr
-    version: 2.0.0
+    version: 2.1.0
 ```
 
 Then install dependencies from the root project:
@@ -95,15 +107,13 @@ behavior from the root project with package-scoped variables:
 ```yaml
 vars:
   ccsr:
-    record_type: "ip"
     wide_condition_enabled: true
     wide_procedure_enabled: true
 ```
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `record_type` | `ip` | Selects the inpatient (`ip`) or outpatient (`op`) default diagnosis category used by `ccsr__singular_condition_category`. |
-| `wide_condition_enabled` | `true` | Builds the wide diagnosis-category output. Set to `false` when only long or singular output is needed. |
+| `wide_condition_enabled` | `true` | Builds the wide diagnosis-category output. Set to `false` when only long output is needed. |
 | `wide_procedure_enabled` | `true` | Builds the wide procedure-category output. Set to `false` when only long or summary output is needed. |
 | `ccsr_data_asset_version` | `2.0.0` | Selects the published mapping snapshot. Change only when coordinating against another published CCSR asset version. |
 
@@ -145,10 +155,32 @@ existing `approach` output and procedure summary continue to use the more
 detailed CMS ICD-10-PCS ontology from Tuva Core. Ontology coverage for new
 procedure codes therefore depends on the Core data assets installed.
 
+## Upgrade from 2.0
+
+Version 2.1 removes `ccsr__singular_condition_category` and the `record_type`
+variable. Consumers of the removed model must migrate. The other five output
+models retain their SQL, schemas, and classification results. AHRQ mappings
+remain at v2027.1 and the mapping asset snapshot remains at `2.0.0`.
+
+1. Replace downstream references to `ccsr__singular_condition_category` with
+   analyses based on `ccsr__long_condition_category`. This is not a direct table
+   substitution: a diagnosis can map to several categories, and the long table
+   includes all diagnosis ranks. Deduplicate people or encounters within each
+   category for the analysis; totals across categories can overlap.
+2. Remove `record_type` from the root project's variables. It no longer has an
+   effect. Do not replace it with a default-category or rank-1 filter unless
+   your analysis independently establishes the care setting and diagnosis role.
+3. Update the package revision to `v2.1.0`, run `dbt deps`, then run
+   `dbt build --select package:ccsr` against the existing Core models.
+4. After migrating dependent models and reports, explicitly drop the old
+   singular table from its deployed schema. dbt does not delete relations when
+   their model files are removed; a leftover table will no longer be refreshed.
+
 ## Upgrade from 1.0
 
-This is a breaking update to the dynamically generated wide schemas and to
-classification results. Review dependent extracts, BI models, and category
+Follow the 2.0-to-2.1 migration above as well as the mapping changes below.
+The mapping update introduced in 2.0 changes dynamically generated wide schemas
+and classification results. Review dependent extracts, BI models, and category
 lists before rebuilding.
 
 | Change from AHRQ v2023.1 | DXCCSR | PRCCSR |
@@ -162,8 +194,8 @@ The diagnosis wide output adds `FAC026`–`FAC031`, `NEO075`–`NEO078`, and
 The procedure wide output adds `prccsr_esa012`. Diagnosis inpatient defaults
 change for 55 existing codes and outpatient defaults for 292. Body-system
 names and category-count descriptions are regenerated from the current AHRQ
-reference workbook. Long and singular output schemas and source-scoped grains
-are unchanged.
+reference workbook. The long outputs retain their schemas and source-scoped
+grains; the singular output is removed in 2.1.
 
 1. Upgrade the CCSR package and remove root-level `dxccsr_version`,
    `prccsr_version`, or `ccsr_data_asset_version` overrides that retain the
